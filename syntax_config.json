@@ -1,0 +1,42 @@
+{
+  "keywords": [
+    "if",
+    "else",
+    "while",
+    "for",
+    "include",
+    "define",
+    "return",
+    "not",
+    "in",
+    "is",
+    "and",
+    "or",
+    "global"
+  ],
+  "funcsetkeywords": ["def", "class"],
+  "comments": ["//", "#"],
+  "multilinecomments": ["/*", "*/"],
+  "default_functions": [
+    "printf",
+    "scanf",
+    "malloc",
+    "sizeof",
+    "print",
+    "input",
+    "pop",
+    "append"
+  ],
+  "types": [
+    "int",
+    "float",
+    "double",
+    "char",
+    "static",
+    "unsigned",
+    "signed",
+    "bool",
+    "str"
+  ],
+  "booleans": ["true", "false", "True", "False"]
+}
