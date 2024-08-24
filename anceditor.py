@@ -21,7 +21,7 @@ def update_window_title():
     if current_file:
         root.title(f"anceditor - {os.path.basename(current_file)}")
     else:
-        root.title("anceditor - sem arquivos abertos")
+        root.title("anceditor")
 
 def update_explorer():
     explorer_frame.delete(0, tk.END)
@@ -97,13 +97,13 @@ def insert_spaces(event):
 def handle_backspace(event):
     index = content_text.index(tk.INSERT)
     line, col = map(int, index.split('.'))
-
+    
     if col >= 4:
         previous_chars = content_text.get(f"{line}.{col-4}", f"{line}.{col}")
         if previous_chars == '    ':
             content_text.delete(f"{line}.{col-4}", f"{line}.{col}")
             return 'break'
-
+    
     return None
 
 def apply_syntax_highlighting():
@@ -114,29 +114,29 @@ def apply_syntax_highlighting():
     content_text.tag_remove('string', '1.0', 'end')
     content_text.tag_remove('type', '1.0', 'end')
     content_text.tag_remove('boolean', '1.0', 'end')
-
+    
     text = content_text.get("1.0", tk.END)
-
+    
     def add_tags(pattern, tag):
         for match in re.finditer(pattern, text, re.DOTALL):
             start_index = f"1.0+{match.start()}c"
             end_index = f"1.0+{match.end()}c"
             content_text.tag_add(tag, start_index, end_index)
-
+    
     # Define patterns
     keyword_pattern = r'\b(?:' + '|'.join(re.escape(k) for k in syntax_config["keywords"]) + r')\b'
     func_keyword_pattern = r'\b(?:' + '|'.join(re.escape(k) for k in syntax_config["funcsetkeywords"]) + r')\b'
     default_func_pattern = r'\b(?:' + '|'.join(re.escape(f) for f in syntax_config["default_functions"]) + r')\b'
-
+    
     comment_pattern = re.escape(syntax_config["comments"]) + r'.*?(?=\n|$)'
     multiline_start = re.escape(syntax_config["multilinecomments"][0])
     multiline_end = re.escape(syntax_config["multilinecomments"][1])
     multiline_comment_pattern = f'{multiline_start}.*?{multiline_end}'
-
+    
     string_pattern = r'"[^"]*"'
     type_pattern = r'\b(?:' + '|'.join(re.escape(t) for t in syntax_config["types"]) + r')\b'
     boolean_pattern = r'\b(?:' + '|'.join(re.escape(b) for b in syntax_config["booleans"]) + r')\b'
-
+    
     # Apply tags
     add_tags(keyword_pattern, 'keyword')
     add_tags(func_keyword_pattern, 'func_keyword')
@@ -146,7 +146,7 @@ def apply_syntax_highlighting():
     add_tags(string_pattern, 'string')
     add_tags(type_pattern, 'type')
     add_tags(boolean_pattern, 'boolean')
-
+    
     # Configure tags
     content_text.tag_configure('keyword', foreground='blue')
     content_text.tag_configure('func_keyword', foreground='red')
@@ -164,14 +164,14 @@ def update_default_functions():
     global syntax_config
     text = content_text.get("1.0", tk.END)
     func_keywords = syntax_config["funcsetkeywords"]
-
+    
     for keyword in func_keywords:
         pattern = rf'\b{re.escape(keyword)}\b\s+(\w+)'
         for match in re.finditer(pattern, text):
             func_name = match.group(1)
             if func_name not in syntax_config["default_functions"]:
                 syntax_config["default_functions"].append(func_name)
-
+    
     apply_syntax_highlighting()
 
 menu_bar = tk.Menu(root)
@@ -203,6 +203,5 @@ root.bind("<Control-n>", lambda event: create_file())
 root.bind("<Control-s>", save_file)
 
 update_explorer()
-update_window_title()
 
 root.mainloop()
