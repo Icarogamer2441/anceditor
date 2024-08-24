@@ -128,7 +128,7 @@ def apply_syntax_highlighting():
     func_keyword_pattern = r'\b(?:' + '|'.join(re.escape(k) for k in syntax_config["funcsetkeywords"]) + r')\b'
     default_func_pattern = r'\b(?:' + '|'.join(re.escape(f) for f in syntax_config["default_functions"]) + r')\b'
 
-    comment_patterns = '|'.join(re.escape(c) + r'.*?(?=\n|$)' for c in syntax_config["comments"])
+    comment_pattern = re.escape(syntax_config["comments"]) + r'.*?(?=\n|$)'
     multiline_start = re.escape(syntax_config["multilinecomments"][0])
     multiline_end = re.escape(syntax_config["multilinecomments"][1])
     multiline_comment_pattern = f'{multiline_start}.*?{multiline_end}'
@@ -141,7 +141,7 @@ def apply_syntax_highlighting():
     add_tags(keyword_pattern, 'keyword')
     add_tags(func_keyword_pattern, 'func_keyword')
     add_tags(default_func_pattern, 'default_func')
-    add_tags(comment_patterns, 'comment')
+    add_tags(comment_pattern, 'comment')
     add_tags(multiline_comment_pattern, 'comment')
     add_tags(string_pattern, 'string')
     add_tags(type_pattern, 'type')
