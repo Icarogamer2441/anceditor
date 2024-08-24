@@ -15,7 +15,7 @@
     "global"
   ],
   "funcsetkeywords": ["def", "class"],
-  "comments": ["//", "#"],
+  "comments": "//",
   "multilinecomments": ["/*", "*/"],
   "default_functions": [
     "printf",
