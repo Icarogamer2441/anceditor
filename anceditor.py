@@ -5,6 +5,15 @@ import re
 
 # Load syntax configuration
 def load_syntax_config(file_path):
+    user_home = os.path.expanduser("~")  # Get the user's home directory
+    while not os.path.exists(file_path):
+        parent_directory = os.path.dirname(file_path)
+        if parent_directory == file_path:  # Reached the root directory
+            if file_path.startswith(user_home):  # Check if we are in the user's home directory
+                raise FileNotFoundError("syntax_config.json not found in the user directory.")
+            break  # Exit the loop if we reach the root without finding it
+        file_path = os.path.join(parent_directory, 'syntax_config.json')
+    
     with open(file_path, 'r') as f:
         return json.load(f)
 
@@ -15,6 +24,8 @@ root.configure(bg='black')
 
 current_directory = os.getcwd()
 current_file = None
+
+click_timer = None  # Ensure this is initialized as None
 
 def update_window_title():
     global current_file
@@ -34,18 +45,35 @@ def update_explorer():
     root.after(500, update_explorer)
 
 def open_item(event):
-    global current_directory, current_file
+    global current_directory, current_file, click_timer
     selected = explorer_frame.curselection()
     if selected:
         item = explorer_frame.get(selected[0])
         full_path = os.path.join(current_directory, item)
-        if os.path.isfile(full_path):
-            current_file = full_path
-            with open(full_path, "r") as f:
-                content_text.delete("1.0", tk.END)
-                content_text.insert("1.0", f.read())
-                apply_syntax_highlighting()
-                update_window_title()
+
+        if click_timer:  # If there's an existing timer, cancel it
+            root.after_cancel(click_timer)  # Use after_cancel to cancel the timer
+
+        click_timer = root.after(200, lambda: handle_single_click(full_path))  # Set a timer for single click
+
+        # Prevent the selection from moving to the top
+        explorer_frame.selection_clear(0, tk.END)  # Clear current selection
+        explorer_frame.selection_set(selected)  # Re-select the current item
+
+def handle_single_click(full_path):
+    global current_directory, current_file
+    if os.path.isfile(full_path):
+        current_file = full_path
+        with open(full_path, "r") as f:
+            content_text.delete("1.0", tk.END)
+            content_text.insert("1.0", f.read())
+            apply_syntax_highlighting()
+            update_window_title()
+    elif os.path.isdir(full_path):  # Handle folder opening
+        current_directory = full_path
+        current_file = None
+        update_explorer()
+        update_window_title()  # Update title to reflect the new directory
 
 def create_file():
     def create():
@@ -133,7 +161,7 @@ def apply_syntax_highlighting():
     multiline_end = re.escape(syntax_config["multilinecomments"][1])
     multiline_comment_pattern = f'{multiline_start}.*?{multiline_end}'
     
-    string_pattern = r'"[^"]*"'
+    string_pattern = r'"([^"\\]*(?:\\.[^"\\]*)*)"'  # Updated to match strings only within a single line
     type_pattern = r'\b(?:' + '|'.join(re.escape(t) for t in syntax_config["types"]) + r')\b'
     boolean_pattern = r'\b(?:' + '|'.join(re.escape(b) for b in syntax_config["booleans"]) + r')\b'
     
